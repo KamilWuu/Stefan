@@ -1,44 +1,9 @@
 // ILYT_MS V.3
 
 #include <Arduino.h>
+#include "setup.h"
+#include "drive.h"
 
-
-#define START_BUTTON 2
-#define LEFT_PWM 3
-#define LEFT_BACK 4
-#define LEFT_FORWARD 5
-#define STARTER_SIGNAL 6
-#define RIGHT_BACK 7
-#define RIGHT_FORWARD 8
-#define RIGHT_PWM 9
-#define LED_GREEN 11
-#define LED_RED 10
-
-#define RIGHT_PWM_VALUE 160
-#define LEFT_PWM_VALUE 160
-#define LEFT_PWM_MAX 255
-#define RIGHT_PWM_MAX 255
-#define PWM_MAX_DIFFERENCE 0
-#define RIGHT_DISTANCE_BORDER 180
-#define LEFT_DISTANCE_BORDER 190
-#define DISTANCE_BORDER 200
-#define DISTANCE_SENSOR_DIFERENCE 26
-#define GROUND_DIFFERENCE 700
-
-String TYPE_OF_START = /*"button" */"starter";
-
-unsigned int RIGHT_DIST_SENSOR = A4;
-unsigned int RIGHT_GROUND_SENSOR = A5;
-unsigned int LEFT_DIST_SENSOR = A6;
-unsigned int LEFT_GROUND_SENSOR = A7;
-
-/**
- *
- *
- *
- *
- *
- * **/
 
 
 
@@ -66,24 +31,9 @@ void debugTest()
  */
 bool ifstart()
 {
-  if (TYPE_OF_START == "button")
-  {
-    if (digitalRead(START_BUTTON) == 0)
-    {
-      digitalWrite(LED_RED, LOW);
-      digitalWrite(LED_GREEN, HIGH);
-      
+ 
 
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
 
-  if (TYPE_OF_START == "starter")
-  {
     if (digitalRead(STARTER_SIGNAL) == 1)
     {
       digitalWrite(LED_RED, LOW);
@@ -94,14 +44,11 @@ bool ifstart()
     {
       return false;
     }
-  }
+  
 
 
 
-  else
-  {
-    return false;
-  }
+
 }
 
 /**
@@ -134,78 +81,6 @@ int tryBreakfast(unsigned int Sensor, unsigned int numberOfSamples)
   return result;
 }
 
-void motorsLow()
-{
-  digitalWrite(LEFT_FORWARD, LOW);
-  digitalWrite(RIGHT_FORWARD, LOW);
-  digitalWrite(LEFT_BACK, LOW);
-  digitalWrite(RIGHT_BACK, LOW);
-}
-
-void motorsForward()
-{
-
-  digitalWrite(LEFT_FORWARD, HIGH);
-  digitalWrite(RIGHT_FORWARD, HIGH);
-}
-
-
-
-void motorsBack(int time)
-{
-  motorsLow();
-  digitalWrite(LEFT_BACK, HIGH);
-  digitalWrite(RIGHT_BACK, HIGH);
-  delay(time);
-  motorsLow();
-}
-
-/**
- * @brief
- *
- * @param time
- */
-void motorsLeft(int time)
-{
-  int R, L, time_tmp = 0;
-  motorsLow();
-  R = analogRead(RIGHT_DIST_SENSOR);
-  L = analogRead(LEFT_DIST_SENSOR);
-
-  while (R < RIGHT_DISTANCE_BORDER && L < LEFT_DISTANCE_BORDER && time_tmp < time)
-  {
-
-    digitalWrite(LEFT_BACK, HIGH);
-    digitalWrite(RIGHT_FORWARD, HIGH);
-    time_tmp++;
-    R = analogRead(RIGHT_DIST_SENSOR);
-    L = analogRead(LEFT_DIST_SENSOR);
-    delay(1);
-  }
-
-  motorsLow();
-}
-
-void motorsRight(int time)
-{
-  int R, L, time_tmp = 0;
-  motorsLow();
-  R = analogRead(RIGHT_DIST_SENSOR);
-  L = analogRead(LEFT_DIST_SENSOR);
-
-  while (R < RIGHT_DISTANCE_BORDER && L < LEFT_DISTANCE_BORDER && time_tmp < time)
-  {
-
-    digitalWrite(LEFT_FORWARD, HIGH);
-    digitalWrite(RIGHT_BACK, HIGH);
-    time_tmp++;
-    R = analogRead(RIGHT_DIST_SENSOR);
-    L = analogRead(LEFT_DIST_SENSOR);
-    delay(1);
-  }
-
-  motorsLow();
-}
 
 
 void sensorPrint(int left, int right, String tmp)
@@ -356,8 +231,7 @@ int main(void)
   /////////Arduino stuff//////////
   init();
 #if defined(USBCON)
-  USBDevice.attach();
-#endif
+  USBDevice.attach();#endif
   ////////////////////////////////
   // Buttons
   pinMode(START_BUTTON, INPUT_PULLUP);
@@ -412,8 +286,7 @@ int main(void)
   { 
    
     analogWrite(LED_RED, 20);
-    if(TYPE_OF_START == "starter")
-    {
+    
       if (digitalRead(START_BUTTON) == 0)
       {
         rotate = "right";
@@ -423,7 +296,7 @@ int main(void)
       }
 
 
-    }
+    
   }
 
 
@@ -448,7 +321,7 @@ int main(void)
   { // void loop() equivalent
     
 
-    if(TYPE_OF_START == "starter" && digitalRead(STARTER_SIGNAL) == 0)
+    if(digitalRead(STARTER_SIGNAL) == 0)
     {
       motorsLow();
       analogWrite(LEFT_PWM, 0);
