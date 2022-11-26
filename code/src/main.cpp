@@ -1,11 +1,10 @@
 // ILYT_MS V.3
 
 #include <Arduino.h>
+#include <Servo.h>
 #include "setup.h"
 #include "drive.h"
 #include "fight.h"
-
-
 
 /**
  * @brief
@@ -47,7 +46,6 @@ void distSensorConfig(int borderInt)
   }
 }
 
-
 void sensorPrint(int left, int right, String tmp)
 {
   Serial.print(left);
@@ -61,9 +59,9 @@ int main(void)
 {
   /////////Arduino stuff//////////
   init();
-  #if defined(USBCON)
+#if defined(USBCON)
   USBDevice.attach();
-  #endif
+#endif
   ////////////////////////////////
   // Buttons
   pinMode(START_BUTTON, INPUT_PULLUP);
@@ -86,6 +84,9 @@ int main(void)
   // Ledy
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_RED, OUTPUT);
+  // Serwa
+  pinMode(SERVO_LEFT, OUTPUT);
+  pinMode(SERVO_RIGHT, OUTPUT);
 
   Serial.begin(9600);
 
@@ -98,133 +99,152 @@ int main(void)
    *
    **/
 
-  int R_distance = 0, L_distance = 0;
+  int R_distance = 0, L_distance = 0, time0, time1;
   String LastFound = "NOTHING", rotate = "left";
+  Servo ServoLeft, ServoRight;
   Serial.begin(9600);
   Serial.print("start_test");
-  for(int i = 0; i < 5; i++)
+  bool ifDetached = false, ifAtached = false;
+
+  for (int i = 0; i < 5; i++)
   {
-    
-    analogWrite(LED_RED, 20);
+
+    digitalWrite(LED_RED, HIGH);
     digitalWrite(LED_GREEN, LOW);
     delay(80);
-    analogWrite(LED_RED, LOW);
+    digitalWrite(LED_RED, LOW);
     digitalWrite(LED_GREEN, HIGH);
     delay(80);
   }
+  ServoLeft.attach(SERVO_LEFT);
+  ServoRight.attach(SERVO_RIGHT);
+  ServoRight.write(130); // pozycja górna wachlarzy
+  ServoLeft.write(50);
+
   digitalWrite(LED_GREEN, LOW);
-  
+
   while (ifstart() == false)
-  { 
-   
-    analogWrite(LED_RED, 20);
-    
-      if (digitalRead(START_BUTTON) == 0)
-      {
-        rotate = "right";
-        digitalWrite(LED_GREEN, HIGH);
-        delay(200);
-        digitalWrite(LED_GREEN, LOW);
-      }
+  {
 
+    digitalWrite(LED_RED, HIGH);
 
-    
+    if (digitalRead(START_BUTTON) == 0)
+    {
+      rotate = "right";
+      digitalWrite(LED_GREEN, HIGH);
+      delay(200);
+      digitalWrite(LED_GREEN, LOW);
+    }
   }
-
+  ServoRight.write(20); // pozycja dolna wachlarzy
+  ServoLeft.write(160);
+  time0 = millis();
 
   analogWrite(LEFT_PWM, LEFT_PWM_MAX);
   analogWrite(RIGHT_PWM, RIGHT_PWM_MAX);
-  
-  
 
   if (rotate == "left")
   {
-    motorsLeft(3000);
+    motorsLeftS(3000);
   }
 
   if (rotate == "right")
   {
-    motorsRight(3000);
+    motorsRightS(3000);
   }
-
-
 
   for (;;)
   { // void loop() equivalent
-    
-
-    if(digitalRead(STARTER_SIGNAL) == 0)
+    if (ifDetached == false)
+    {
+      time1 = millis();
+      if (time1 - time0 > 1000)
+      {
+        ServoRight.detach();
+        ServoLeft.detach();
+        ifDetached = true;
+      }
+    }
+    if (digitalRead(STARTER_SIGNAL) == 0)
     {
       motorsLow();
       analogWrite(LEFT_PWM, 0);
       analogWrite(RIGHT_PWM, 0);
-      digitalWrite(LED_GREEN, LOW);
-      analogWrite(LED_RED, 20);
+      if (ifAtached == false)
+        /*{
+          ServoLeft.attach(SERVO_LEFT);
+          ServoRight.attach(SERVO_RIGHT);
+          ServoRight.write(130);       //pozycja górna wachlarzy
+          ServoLeft.write(50);
+          ifAtached = true;
+        }*/
+        digitalWrite(LED_GREEN, LOW);
+      digitalWrite(LED_RED, HIGH);
       delay(1000);
-      analogWrite(LED_RED, 0);
+      digitalWrite(LED_RED, LOW);
       delay(1000);
       continue;
     }
 
     R_distance = analogRead(RIGHT_DIST_SENSOR);
     L_distance = analogRead(LEFT_DIST_SENSOR);
-    motorsForward();
 
+    motorsForward();
 
     LastFound = foundDirection(L_distance, R_distance);
 
     // JAZDA NOWY SPOSOB
 
-    if (L_distance > LEFT_DISTANCE_BORDER || R_distance > RIGHT_DISTANCE_BORDER)
+    /*if (L_distance > LEFT_DISTANCE_BORDER || R_distance > RIGHT_DISTANCE_BORDER)
+    {*/
+    if (ifWhiteLine() == false)
     {
-      if (ifWhiteLine() == false)
+      int difference, left_pwm, right_pwm;
+      difference = abs(L_distance - R_distance);
+      if (difference > 250)
       {
-        int difference, left_pwm, right_pwm;
-        difference = abs(L_distance - R_distance);
-        if (difference > 165)
-        {   analogWrite(LEFT_PWM, LEFT_PWM_VALUE);
-            analogWrite(RIGHT_PWM, RIGHT_PWM_VALUE);
-          if (L_distance > R_distance)
-          {
-            left_pwm = constrain((LEFT_PWM_VALUE - (L_distance / 6)), 25, 255);
-            right_pwm = constrain((RIGHT_PWM_VALUE + (L_distance / 6)), 25, 255);
-          }
 
-          if (R_distance > L_distance)
-          {
-            left_pwm = constrain((LEFT_PWM_VALUE + (R_distance / 6)), 25, 255);
-            right_pwm = constrain((RIGHT_PWM_VALUE - (R_distance / 6)), 25, 255);
-          }
-        }
-        else
+        if (R_distance > L_distance)
         {
-          left_pwm = LEFT_PWM_MAX;
-          right_pwm = RIGHT_PWM_MAX;
+          left_pwm = constrain((LEFT_PWM_VALUE + (R_distance / 6)), 0, 255);
+          right_pwm = constrain((RIGHT_PWM_VALUE - (R_distance / 6)), 0, 255);
         }
-
-        analogWrite(LEFT_PWM, left_pwm);
-        analogWrite(RIGHT_PWM, right_pwm);
-        motorsForward();
+        if (L_distance > R_distance)
+        {
+          left_pwm = constrain((LEFT_PWM_VALUE - (L_distance / 6)), 0, 255);
+          right_pwm = constrain((RIGHT_PWM_VALUE + (L_distance / 6)), 0, 255);
+        }
       }
+      else
+      {
+        left_pwm = LEFT_PWM_MAX;
+        right_pwm = RIGHT_PWM_MAX;
+      }
+      /*sensorPrint(L_distance, R_distance, "odleglosc");*/
+      sensorPrint(left_pwm, right_pwm, "pwm");
+      analogWrite(RIGHT_PWM, right_pwm);
+      analogWrite(LEFT_PWM, left_pwm);
+
+      motorsForward();
     }
+    /*}*/
 
     // SZUKANIE PRZECIWNIKA
 
-    if (L_distance < LEFT_DISTANCE_BORDER && R_distance < RIGHT_DISTANCE_BORDER)
-    { 
-      analogWrite(LEFT_PWM, LEFT_PWM_MAX);
-      analogWrite(RIGHT_PWM, RIGHT_PWM_MAX);
-      if (ifWhiteLine() == false)
-      {
-        searchOpponent(LastFound);
-      }
-    }
+    /* if (L_distance < LEFT_DISTANCE_BORDER && R_distance < RIGHT_DISTANCE_BORDER)
+     {
+       analogWrite(LEFT_PWM, LEFT_PWM_MAX);
+       analogWrite(RIGHT_PWM, RIGHT_PWM_MAX);
+       if (ifWhiteLine() == false)
+       {
+         searchOpponent(LastFound);
+       }
+     }*/
 
     ////////////Arduino stuff/////////////
     if (serialEventRun)
       serialEventRun();
     //////////////////////////////////////
-    
   }
   return 0;
 }
