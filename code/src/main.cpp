@@ -104,7 +104,7 @@ int main(void)
   Servo ServoLeft, ServoRight;
   Serial.begin(9600);
   Serial.print("start_test");
-  bool ifDetached = false, ifAtached = false;
+  bool ifDetached = false;
 
   for (int i = 0; i < 5; i++)
   {
@@ -170,15 +170,7 @@ int main(void)
       motorsLow();
       analogWrite(LEFT_PWM, 0);
       analogWrite(RIGHT_PWM, 0);
-      if (ifAtached == false)
-        /*{
-          ServoLeft.attach(SERVO_LEFT);
-          ServoRight.attach(SERVO_RIGHT);
-          ServoRight.write(130);       //pozycja górna wachlarzy
-          ServoLeft.write(50);
-          ifAtached = true;
-        }*/
-        digitalWrite(LED_GREEN, LOW);
+      digitalWrite(LED_GREEN, LOW);
       digitalWrite(LED_RED, HIGH);
       delay(1000);
       digitalWrite(LED_RED, LOW);
@@ -231,15 +223,15 @@ int main(void)
 
     // SZUKANIE PRZECIWNIKA
 
-    /* if (L_distance < LEFT_DISTANCE_BORDER && R_distance < RIGHT_DISTANCE_BORDER)
-     {
-       analogWrite(LEFT_PWM, LEFT_PWM_MAX);
-       analogWrite(RIGHT_PWM, RIGHT_PWM_MAX);
-       if (ifWhiteLine() == false)
-       {
-         searchOpponent(LastFound);
-       }
-     }*/
+    if (L_distance < LEFT_DISTANCE_BORDER && R_distance < RIGHT_DISTANCE_BORDER)
+    {
+      analogWrite(LEFT_PWM, LEFT_PWM_MAX);
+      analogWrite(RIGHT_PWM, RIGHT_PWM_MAX);
+      if (ifWhiteLine() == false)
+      {
+        searchOpponent(LastFound);
+      }
+    }
 
     ////////////Arduino stuff/////////////
     if (serialEventRun)
