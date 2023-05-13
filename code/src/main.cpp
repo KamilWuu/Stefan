@@ -64,7 +64,7 @@ int main(void)
 #endif
   ////////////////////////////////
   // Buttons
-  pinMode(START_BUTTON, INPUT_PULLUP);
+  pinMode(START_BUTTON, INPUT);
   pinMode(STARTER_SIGNAL, INPUT);
 
   // Sensors
@@ -176,7 +176,7 @@ int main(void)
       digitalWrite(LED_RED, LOW);
       delay(1000);
       continue;
-    }
+    } 
 
     R_distance = analogRead(RIGHT_DIST_SENSOR);
     L_distance = analogRead(LEFT_DIST_SENSOR);
@@ -223,7 +223,7 @@ int main(void)
 
     // SZUKANIE PRZECIWNIKA
 
-    if (L_distance < LEFT_DISTANCE_BORDER && R_distance < RIGHT_DISTANCE_BORDER)
+    /*if (L_distance < LEFT_DISTANCE_BORDER && R_distance < RIGHT_DISTANCE_BORDER)
     {
       analogWrite(LEFT_PWM, LEFT_PWM_MAX);
       analogWrite(RIGHT_PWM, RIGHT_PWM_MAX);
@@ -231,7 +231,7 @@ int main(void)
       {
         searchOpponent(LastFound);
       }
-    }
+    }*/
 
     ////////////Arduino stuff/////////////
     if (serialEventRun)

@@ -2,11 +2,11 @@
 
 #include <Arduino.h>
 
-#define START_BUTTON 2
+#define START_BUTTON A1
 #define LEFT_PWM 3
 #define LEFT_BACK 4
 #define LEFT_FORWARD 5
-#define STARTER_SIGNAL 6
+#define STARTER_SIGNAL A0
 #define RIGHT_BACK 7
 #define RIGHT_FORWARD 8
 #define RIGHT_PWM 9
