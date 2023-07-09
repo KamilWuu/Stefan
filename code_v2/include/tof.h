@@ -13,8 +13,9 @@
 #define HIGH_SPEED
 //#define HIGH_ACCURACY
 
-#define TIMING_BUDGET 33
-#define TIMEOUT_VALUE 40
+#define TIMING_BUDGET 50
+
+#define TIMEOUT_VALUE 70
 
 #define ZERO_DISTANCE 900
 

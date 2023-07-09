@@ -73,9 +73,9 @@ bool state::readStarter()
 
 void state::distState() //Ustawienie "flagi" 
 {
-    if(L_TOF < TOF_BORDER && R_TOF < TOF_BORDER){distStateHolder = left_right_tof;} //5
+    if(L_TOF > 50 && L_TOF < TOF_BORDER && R_TOF < TOF_BORDER){distStateHolder = left_right_tof;} //5
     else if(R_TOF < TOF_BORDER){distStateHolder = right_tof;} //3
-    else if(L_TOF < TOF_BORDER){distStateHolder = left_tof;} //2
+    else if(L_TOF > 50 &&  L_TOF < TOF_BORDER){distStateHolder = left_tof;} //2
     else if(R_SHARP > SHARP_BORDER){distStateHolder = right_sharp;} //4
     else if(L_SHARP > SHARP_BORDER){distStateHolder = left_sharp;} //1
     else{distStateHolder = nothing;}//0

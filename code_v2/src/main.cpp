@@ -25,7 +25,7 @@ int main(void)
   bool ifDetached = false;
   bool leftRotate = false;
   bool ledState = LOW;
-  int time0, time1;
+  int time0, time1;//Time;
   pinModes();
   
   tofs.setID();
@@ -100,7 +100,7 @@ int main(void)
   for (;;)
   {
     
-    
+    //Time = millis();
     while (sensorsState.readStarter())
     {
 
@@ -115,7 +115,8 @@ int main(void)
       }
     }
     
-
+    //while(Time + 2000 > micros());
+    //Time = micros();
     
     sensorsState.sensorsRead(tofs);
     makeAMove(sensorsState, tofs);
@@ -123,7 +124,7 @@ int main(void)
     sensorsState.resetStates();
     
 
-
+    //delay(100);
 
     }
 

@@ -2,11 +2,11 @@
 #include <Arduino.h>
 #include "tof.h"
 
-#define GROUND_BORDER 500
+#define GROUND_BORDER 700
 
-#define TOF_BORDER 400
+#define TOF_BORDER 350
 
-#define SHARP_BORDER 250
+#define SHARP_BORDER 300
 #define RIGHT_SHARP_BORDER 250
 #define LEFT_SHARP_BORDER 250
 #define SHARP_DIFERENCE 26
